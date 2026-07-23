@@ -57,8 +57,6 @@
   .btn-sec{background:#fff;color:var(--teal);border:1.5px solid var(--teal) !important}
   .btn-sec:hover{background:var(--lightteal)}
   .placeholder{color:var(--muted);font-style:italic}
-  .tbtn{display:inline-block;margin-top:4px;font-size:12px;color:var(--teal2);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;font-family:inherit}
-  .tbtn:hover{color:var(--teal)}
   .enmark{background:#fff3cd;outline:1px solid #e0c159}
   .paper .ennote{font-family:'Univers','Helvetica Neue',Arial,sans-serif;font-size:11px;color:#8a6d1a;background:#fff3cd;border-radius:4px;padding:2px 6px;margin-left:4px}
 </style>
@@ -109,30 +107,26 @@
         <option value="betrieb">Redundancy (betriebsbedingt, neutral phrasing)</option>
       </select>
     </div>
-    <label>Manager name <span class="opt">(for HR records, not printed)</span></label>
-    <input type="text" id="managerName">
   </div>
 
   <div class="card">
     <h2>C · Main responsibilities</h2>
-    <div class="hint">One responsibility per line, 3&ndash;8 entries. Written in German, these become the task description bullet list.</div>
+    <div class="hint">One responsibility per line, 3&ndash;8 entries. These become the task description bullet list &ndash; German preferred; English entries are flagged for translation.</div>
     <textarea id="tasks" rows="6" placeholder="Entwicklung und Betrieb von ML-Pipelines&#10;Technische Betreuung von Kundenprojekten&#10;..."></textarea>
-    <button type="button" class="tbtn" data-translate-id="tasks">Wrote it in English? Translate to German (DeepL) ↗</button>
   </div>
 
   <div class="card">
     <h2>D · Ratings</h2>
     <div class="note"><b>Scale:</b> 1 Outstanding · 2 Very good · 3 Good · 4 Satisfactory · 5 Needs improvement.<br>
-    Comments are optional, inserted verbatim into the German document &ndash; <b>please write them in German</b>, concrete and positive only.<br>
+    Comments are optional and inserted verbatim into the German document &ndash; concrete and positive only. German preferred; English is fine and will be flagged for translation by the People team.<br>
     <b>The Overall rating carries the most weight</b>: it drives the summary sentence and the closing formula.</div>
     <div id="cats"></div>
     <div class="warn" id="warn5">One or more categories are rated 5. German employment references must be benevolent by law, so the document uses grade-4 wording instead and is marked as DRAFT. Please contact Finance/HR to discuss this reference before issuing.</div>
   </div>
 
   <div class="card">
-    <h2>E · Major achievements <span class="opt" style="text-transform:none;font-size:12px">(optional, in German)</span></h2>
+    <h2>E · Major achievements <span class="opt" style="text-transform:none;font-size:12px">(optional)</span></h2>
     <textarea id="achievements" rows="4" placeholder="z. B. erfolgreiche Einführung des föderierten ADMET-Netzwerks bei drei Pharmapartnern ..."></textarea>
-    <button type="button" class="tbtn" data-translate-id="achievements">Wrote it in English? Translate to German (DeepL) ↗</button>
   </div>
 
   <div class="card">
@@ -281,9 +275,8 @@ ORDER.forEach(key=>{
   }
   inner += `<div class="rating-group" data-key="${key}">`+
     [1,2,3,4,5].map(g=>`<button data-g="${g}" class="${g===5?'g5b':''}">${g}</button>`).join("")+
-    `</div><label class="opt" style="font-weight:400;font-size:12px">Comment (optional, German)</label>
-    <textarea rows="2" data-comment="${key}"></textarea>
-    <button type="button" class="tbtn" data-translate="${key}">Wrote it in English? Translate to German (DeepL) ↗</button>`;
+    `</div><label class="opt" style="font-weight:400;font-size:12px">Comment (optional)</label>
+    <textarea rows="2" data-comment="${key}"></textarea>`;
   if(c.leadership) inner += `</div>`;
   div.innerHTML = inner;
   catsDiv.appendChild(div);
@@ -321,19 +314,22 @@ document.addEventListener("click",e=>{
     render();
   }
 });
-["issueDate","firstName","lastName","gender","jobTitle","startDate","endDate","reason","tasks","achievements","managerName","internal"]
+["issueDate","firstName","lastName","gender","jobTitle","startDate","endDate","reason","tasks","achievements","internal"]
   .forEach(id=>document.getElementById(id).addEventListener("input",render));
 document.getElementById("issueDate").value = new Date().toISOString().slice(0,10);
 
 function reshuffle(){ state.seed = Math.floor(Math.random()*1e6); render(); }
 
-/* ---- language detection & DeepL handoff ---- */
-const EN_WORDS=/\b(the|and|with|of|was|is|he|she|they|team|work|worked|very|has|had|for|his|her|their|led|managed|delivered|project|projects|customer|customers|successfully|improved|also|which|that|from|new|during)\b/gi;
-const DE_HINTS=/[äöüß]|\b(und|der|die|das|mit|für|wurde|sehr|bei|von|dem|den|eine|einen|stets|hat|sich|auch|sowie|durch)\b/i;
+/* ---- language detection ---- */
+/* English words that are NOT also German words (avoids false flags on German text) */
+const EN_WORDS=/\b(the|and|with|of|is|are|he|she|they|we|you|it|i|this|that|these|those|his|her|their|our|your|has|have|had|been|be|will|would|can|could|should|to|for|from|not|but|or|at|on|by|as|do|does|did|don't|doesn't|didn't|can't|won't|isn't|wasn't|aren't|it's|that's|know|knows|knew|think|thinks|thought|want|wants|need|needs|just|some|any|because|about|only|then|if|when|while|since|until|able|other|another|many|much|every|never|often|really|worked|working|works|went|got|took|gave|made|kept|showed|put|very|always|good|great|excellent|strong|highly|skills|skill|ability|responsible|reliable|led|managed|manages|delivered|demonstrated|helped|ensured|improved|developed|created|built|successfully|during|which|who|whom|more|most|well|colleagues|customers|company|role|tasks|goals|results|performance|leadership|communication|throughout|across|within)\b/gi;
+const DE_HINTS=/[äöüß]|\b(und|der|die|das|mit|für|wurde|wurden|sehr|bei|von|dem|den|des|eine|einen|einer|stets|hat|hatte|sich|auch|sowie|durch|er|sie|ist|war|waren|im|zum|zur|nicht|als|über|unter|nach|vor|seine|ihre|dabei|dessen|deren|ich|wir|mir|mich|ihn|ihnen|kann|können|konnte|muss|wird|werden|sind|haben|gibt|gab|mehr|immer|dann|wenn|weil|dass|noch|schon|nur|aber|oder|wie|weiss)\b/gi;
 function looksEnglish(t){
-  if(!t||t.trim().length<8) return false;
+  if(!t||t.trim().length<4) return false;
   const en=(t.match(EN_WORDS)||[]).length;
-  return en>=2 && !DE_HINTS.test(t);
+  const de=(t.match(DE_HINTS)||[]).length;
+  if(en===0) return false;
+  return en>=2 ? en>=de : en>de;  /* clear English presence wins ties -> flag */
 }
 function checkText(t){
   if(!t||!t.trim()) return null;
@@ -343,18 +339,26 @@ function checkText(t){
     if(upper/letters.length>0.7) return "Formatting: all caps — please rewrite in normal case";
   }
   if(/(.)\1{3,}/.test(t) || /[!?]{2,}/.test(t)) return "Formatting: please check (repeated characters/punctuation)";
-  if(looksEnglish(t)) return "Not German? Please translate before issuing";
+  if(looksEnglish(t)) return "Not in German — the People team will translate this before issuing";
   return null;
 }
-function openDeepL(text){
-  if(!text||!text.trim()){ alert("Nothing to translate yet – write your comment first, then click translate."); return; }
-  window.open("https://www.deepl.com/translator#en/de/"+encodeURIComponent(text.trim()),"_blank");
+/* ---- live inline warnings under text fields ---- */
+function attachLiveCheck(el,perLine){
+  const w=document.createElement("div");
+  w.style.cssText="display:none;font-size:12px;color:#8a6d1a;background:#fff3cd;border-radius:4px;padding:4px 8px;margin-top:4px";
+  el.insertAdjacentElement("afterend",w);
+  el.addEventListener("input",()=>{
+    let issue=null;
+    if(perLine){
+      for(const line of el.value.split("\n")){ issue=checkText(line); if(issue) break; }
+    } else issue=checkText(el.value);
+    if(issue){ w.textContent="⚠ "+issue; w.style.display="block"; }
+    else w.style.display="none";
+  });
 }
-document.addEventListener("click",e=>{
-  const b=e.target.closest("button.tbtn"); if(!b) return;
-  if(b.dataset.translate){ openDeepL(document.querySelector(`textarea[data-comment="${b.dataset.translate}"]`).value); }
-  if(b.dataset.translateId){ openDeepL(document.getElementById(b.dataset.translateId).value); }
-});
+document.querySelectorAll("textarea[data-comment]").forEach(t=>attachLiveCheck(t,false));
+attachLiveCheck(document.getElementById("tasks"),true);
+attachLiveCheck(document.getElementById("achievements"),false);
 
 /* ---- grammar & text engine ---- */
 const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
@@ -556,7 +560,6 @@ async function sendToFinance(){
       const fd=new FormData();
       fd.append("file",blob,fname);
       fd.append("employee",ln);
-      fd.append("manager",document.getElementById("managerName").value);
       fd.append("internalNote",document.getElementById("internal").value);
       const r=await fetch(CONFIG.uploadEndpoint,{method:"POST",body:fd});
       if(!r.ok) throw new Error(r.status);
@@ -576,7 +579,6 @@ async function sendToFinance(){
 please find attached the generated Zeugnis draft for ${ln}.
 (The file "${fname}" was just saved to your Downloads folder - please attach it before sending.)
 
-Manager: ${document.getElementById("managerName").value||"-"}
 Internal note for the People team: ${document.getElementById("internal").value||"-"}
 
 This draft was generated with the Apheris Reference Letter Generator and requires review by the People team before issuing.`);
