@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apheris Reference Letter Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<style>
+  :root{
+    --teal:#20484D; --teal2:#429099; --tealfill:#CEE7EA; --lightteal:#E9ECEC;
+    --grey:#F2F2F2; --muted:#8F9B9D; --coral:#E84661; --ink:#20484D;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Univers','Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--lightteal);color:var(--ink)}
+  header{background:var(--teal);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+  header h1{margin:0;font-size:20px;font-weight:600;letter-spacing:.3px}
+  header .sub{font-size:13px;color:var(--tealfill)}
+  .wrap{display:grid;grid-template-columns:minmax(380px,540px) 1fr;gap:24px;padding:24px;max-width:1600px;margin:0 auto}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr}}
+  .card{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(32,72,77,.10);padding:20px 22px;margin-bottom:18px}
+  .card h2{font-size:15px;margin:0 0 14px;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;border-bottom:2px solid var(--tealfill);padding-bottom:8px}
+  label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+  label .opt{font-weight:400;color:var(--muted)}
+  input[type=text],input[type=date],select,textarea{width:100%;padding:8px 10px;border:1px solid #c9d6d8;border-radius:6px;font-size:14px;font-family:inherit;color:var(--ink);background:#fff}
+  textarea{resize:vertical;min-height:64px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--teal2);border-color:var(--teal2)}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  .note{font-size:12.5px;background:var(--lightteal);border-left:3px solid var(--teal2);padding:8px 10px;border-radius:0 6px 6px 0;margin:10px 0}
+  .rating-group{display:flex;gap:6px;margin-top:4px}
+  .rating-group button{flex:1;padding:8px 0;border:1px solid #c9d6d8;background:#fff;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .rating-group button:hover{background:var(--lightteal)}
+  .rating-group button.sel{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .rating-group button.sel.g5{background:var(--coral);border-color:var(--coral)}
+  .cat{padding:12px 0;border-bottom:1px dashed #dde6e7}
+  .cat:last-child{border-bottom:none}
+  .cat .cname{font-weight:600;font-size:14px}
+  .cat .cdesc{font-size:12px;color:var(--muted)}
+  .warn{display:none;background:#fdecef;border:1px solid var(--coral);color:#9c1f36;padding:10px 12px;border-radius:8px;font-size:13px;margin:12px 0}
+  .warn.show{display:block}
+  .toggle{display:flex;gap:8px;margin-top:4px}
+  .toggle button{padding:8px 18px;border:1px solid #c9d6d8;background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+  .toggle button.sel{background:var(--teal);color:#fff;border-color:var(--teal)}
+  /* preview pane */
+  .previewCol{position:sticky;top:16px;align-self:start}
+  .paper{background:#fff;border-radius:6px;box-shadow:0 4px 18px rgba(32,72,77,.18);padding:56px 64px;min-height:600px;font-family:Georgia,'Times New Roman',serif;font-size:14.5px;line-height:1.65;color:#1a1a1a;max-height:82vh;overflow-y:auto}
+  @media(max-width:980px){.previewCol{position:static}.paper{padding:28px 24px}}
+  .paper h3{text-align:center;font-size:19px;letter-spacing:1px;margin:0 0 26px;font-weight:700}
+  .paper p{margin:0 0 13px;text-align:justify}
+  .paper ul{margin:0 0 13px 22px}
+  .paper .sig{margin-top:44px}
+  .paper .draftflag{color:var(--coral);font-family:inherit;font-weight:700;text-align:center;border:2px solid var(--coral);padding:6px;margin-bottom:18px}
+  .actions{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .actions button{padding:11px 18px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+  .btn-primary{background:var(--teal);color:#fff}
+  .btn-primary:hover{background:#16363a}
+  .btn-sec{background:#fff;color:var(--teal);border:1.5px solid var(--teal) !important}
+  .btn-sec:hover{background:var(--lightteal)}
+  .placeholder{color:var(--muted);font-style:italic}
+  .enmark{background:#fff3cd;outline:1px solid #e0c159}
+  .paper .ennote{font-family:'Univers','Helvetica Neue',Arial,sans-serif;font-size:11px;color:#8a6d1a;background:#fff3cd;border-radius:4px;padding:2px 6px;margin-left:4px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Apheris · Reference Letter Generator</h1>
+  <span class="sub">Fill in the form (English) &rarr; German employment reference is generated live &rarr; download as Word</span>
+</header>
+
+<div class="wrap">
+<div><!-- ===================== FORM COLUMN ===================== -->
+
+  <div class="card">
+    <h2>A · Reference details</h2>
+    <label>Type of reference</label>
+    <div class="toggle" id="typeToggle">
+      <button data-v="final" class="sel">Arbeitszeugnis (final)</button>
+      <button data-v="interim">Zwischenzeugnis (interim)</button>
+    </div>
+    <label>Issue date</label>
+    <input type="date" id="issueDate">
+  </div>
+
+  <div class="card">
+    <h2>B · Employee information</h2>
+    <div class="row">
+      <div><label>First name</label><input type="text" id="firstName" placeholder="Max"></div>
+      <div><label>Last name</label><input type="text" id="lastName" placeholder="Mustermann"></div>
+    </div>
+    <label>Salutation / grammar</label>
+    <select id="gender">
+      <option value="m">Mr — he/his (generates "Herr", er/sein)</option>
+      <option value="f">Ms — she/her (generates "Frau", sie/ihr)</option>
+      <option value="n">Neutral — name-based phrasing, no pronouns</option>
+    </select>
+    <label>Job title</label><input type="text" id="jobTitle" placeholder="Senior Machine Learning Engineer">
+    <div class="row">
+      <div><label>Employment start</label><input type="date" id="startDate"></div>
+      <div id="endWrap"><label>Employment end</label><input type="date" id="endDate"></div>
+    </div>
+    <div id="reasonWrap">
+      <label>Reason for leaving</label>
+      <select id="reason">
+        <option value="wunsch">Employee resignation (auf eigenen Wunsch)</option>
+        <option value="einvernehmen">Mutual agreement (im besten gegenseitigen Einvernehmen)</option>
+        <option value="befristung">End of fixed-term contract (Befristung)</option>
+        <option value="betrieb">Redundancy (betriebsbedingt, neutral phrasing)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>C · Main responsibilities</h2>
+    <div class="hint">One responsibility per line, 3&ndash;8 entries. These become the task description bullet list &ndash; German preferred; English entries are flagged for translation.</div>
+    <textarea id="tasks" rows="6" placeholder="Entwicklung und Betrieb von ML-Pipelines&#10;Technische Betreuung von Kundenprojekten&#10;..."></textarea>
+  </div>
+
+  <div class="card">
+    <h2>D · Ratings</h2>
+    <div class="note"><b>Scale:</b> 1 Outstanding · 2 Very good · 3 Good · 4 Satisfactory · 5 Needs improvement.<br>
+    Comments are optional and inserted verbatim into the German document &ndash; concrete and positive only. German preferred; English is fine and will be flagged for translation by the People team.<br>
+    <b>The Overall rating carries the most weight</b>: it drives the summary sentence and the closing formula.</div>
+    <div id="cats"></div>
+    <div class="warn" id="warn5">One or more categories are rated 5. German employment references must be benevolent by law, so the document uses grade-4 wording instead and is marked as DRAFT. Please contact Finance/HR to discuss this reference before issuing.</div>
+  </div>
+
+  <div class="card">
+    <h2>E · Major achievements <span class="opt" style="text-transform:none;font-size:12px">(optional)</span></h2>
+    <textarea id="achievements" rows="4" placeholder="z. B. erfolgreiche Einführung des föderierten ADMET-Netzwerks bei drei Pharmapartnern ..."></textarea>
+  </div>
+
+  <div class="card">
+    <h2>F · Additional information</h2>
+    <div class="hint">For Finance/HR review only. Does not appear in the document.</div>
+    <textarea id="internal" rows="3"></textarea>
+  </div>
+</div>
+
+<div class="previewCol"><!-- ===================== PREVIEW COLUMN ===================== -->
+  <div class="actions">
+    <button class="btn-primary" onclick="sendToFinance()">Download &amp; send to People team</button>
+    <button class="btn-sec" onclick="copyText()">Copy text</button>
+    <button class="btn-sec" onclick="reshuffle()">Vary formulations</button>
+  </div>
+  <div class="paper" id="preview"></div>
+</div>
+</div>
+
+<script>
+/* ================================================================
+   MAPPING BLOCK — edit sentences, company paragraph & signature here
+   ----------------------------------------------------------------
+   Tokens available in every sentence:
+     [NAME]    Herr Mustermann / Frau Mustermann / Max Mustermann
+     [ER]      er / sie / full name        [ER_CAP] capitalised
+     [IHM]     ihm / ihr / full name (dative)
+     [IHN]     ihn / sie / full name (accusative)
+     [SEIN]    sein / ihr / name-genitive   (+ [SEINE] [SEINEN] [SEINER])
+     [TITLE] [START] [ENDE] [FIRMA]
+   Tense pairs: {past|present} — the generator picks past for a final
+   Arbeitszeugnis and present for a Zwischenzeugnis.
+   Grades: arrays g1..g4 hold formulation variants. Grade 5 input is
+   mapped to g4 automatically and flags the document as DRAFT.
+   ================================================================ */
+const CONFIG = {
+  companyName: "Apheris AI GmbH",
+  companyParagraph: "Die Apheris AI GmbH mit Sitz in Berlin entwickelt die Zukunft des KI-Einsatzes in der pharmazeutischen Forschung und Entwicklung. Apheris betreibt die branchenweit größten föderierten Datennetzwerke für KI-gestützte Wirkstoffforschung, in denen Modelle auf proprietären Industriedaten trainiert werden, ohne dass Daten die Umgebung der Partner verlassen.",
+  signatureCity: "Berlin",
+  signatureLine1: "Robin Röhm, CEO",
+  signatureName1: "",
+  signatureLine2: "ppa.",
+  signatureName2: "",                       // e.g. "Bojana Ivanovic Jentsch"
+  recipientEmail: "operations@apheris.com", // where managers send the draft
+  uploadEndpoint: "",                       // optional: URL of a SharePoint upload endpoint
+                                            // (e.g. Power Automate HTTP trigger). If set, the
+                                            // tool uploads the .docx automatically instead of
+                                            // opening an email draft.
+};
+
+const SENT = {
+  fach: { name:"Professional Knowledge", desc:"Fachwissen",
+    g1:["[NAME] {verfügte|verfügt} über ein äußerst umfassendes und fundiertes Fachwissen, das [ER] jederzeit sicher und äußerst zielgerichtet in der Praxis {einsetzte|einsetzt}.",
+        "[NAME] {besaß|besitzt} ein hervorragendes, stets aktuelles Fachwissen, das [ER] immer sehr sicher und mit großem Erfolg {anwandte|anwendet}."],
+    g2:["[NAME] {verfügte|verfügt} über ein umfassendes und fundiertes Fachwissen, das [ER] stets sicher und zielgerichtet {einsetzte|einsetzt}.",
+        "[NAME] {besaß|besitzt} ein sehr gutes Fachwissen, das [ER] sicher und erfolgreich in der Praxis {anwandte|anwendet}."],
+    g3:["[NAME] {verfügte|verfügt} über ein solides Fachwissen, das [ER] sicher {einsetzte|einsetzt}."],
+    g4:["[NAME] {verfügte|verfügt} über das erforderliche Fachwissen und {setzte|setzt} es im Allgemeinen zweckmäßig ein."] },
+  init: { name:"Initiative & Commitment", desc:"Arbeitsbereitschaft, Eigeninitiative, Verantwortung",
+    g1:["[ER_CAP] {zeigte|zeigt} stets ein sehr hohes Maß an Eigeninitiative, Engagement und Leistungsbereitschaft und {übernahm|übernimmt} bereitwillig Verantwortung, auch über den eigenen Aufgabenbereich hinaus.",
+        "[ER_CAP] {identifizierte|identifiziert} sich in höchstem Maße mit den übertragenen Aufgaben und {zeigte|zeigt} dabei stets größtes Engagement und außerordentliche Einsatzbereitschaft."],
+    g2:["[ER_CAP] {zeigte|zeigt} stets ein hohes Maß an Eigeninitiative und Engagement und {übernahm|übernimmt} gerne Verantwortung.",
+        "[ER_CAP] {engagierte|engagiert} sich stets mit großer Einsatzbereitschaft und {handelte|handelt} dabei eigenverantwortlich und vorausschauend."],
+    g3:["[ER_CAP] {zeigte|zeigt} Eigeninitiative und Engagement und {übernahm|übernimmt} Verantwortung für die übertragenen Aufgaben."],
+    g4:["[ER_CAP] {zeigte|zeigt} Einsatzbereitschaft und {erledigte|erledigt} die übertragenen Aufgaben ordnungsgemäß."] },
+  weise: { name:"Work Approach", desc:"Arbeitsweise: independence, structure, diligence",
+    g1:["[SEINE] Arbeitsweise {war|ist} stets äußerst sorgfältig, strukturiert und in hohem Maße selbstständig; auch komplexe Aufgaben {plante|plant} und {erledigte|erledigt} [ER] jederzeit systematisch und äußerst effizient.",
+        "[ER_CAP] {arbeitete|arbeitet} jederzeit äußerst gewissenhaft, strukturiert und vollkommen selbstständig und {fand|findet} auch für schwierige Aufgabenstellungen stets sehr gute Lösungen."],
+    g2:["[SEINE] Arbeitsweise {war|ist} stets sorgfältig, strukturiert und selbstständig; die übertragenen Aufgaben {plante|plant} und {erledigte|erledigt} [ER] systematisch und effizient.",
+        "[ER_CAP] {arbeitete|arbeitet} stets gewissenhaft, gut organisiert und selbstständig."],
+    g3:["[SEINE] Arbeitsweise {war|ist} sorgfältig und strukturiert; die übertragenen Aufgaben {erledigte|erledigt} [ER] selbstständig und ordnungsgemäß."],
+    g4:["[SEINE] Arbeitsweise {war|ist} im Allgemeinen sorgfältig; die übertragenen Aufgaben {erledigte|erledigt} [ER] ordnungsgemäß."] },
+  druck: { name:"Ability to Work Under Pressure", desc:"Belastbarkeit",
+    g1:["Auch unter hohem Zeit- und Termindruck {behielt|behält} [ER] stets den Überblick, {setzte|setzt} Prioritäten jederzeit richtig und {lieferte|liefert} durchgehend Arbeitsergebnisse von sehr hoher Qualität.",
+        "Selbst in Situationen mit höchstem Arbeitsanfall {blieb|bleibt} [ER] jederzeit souverän und leistungsstark und {erzielte|erzielt} stets sehr gute Ergebnisse."],
+    g2:["Auch unter Termindruck {behielt|behält} [ER] stets den Überblick und {lieferte|liefert} gute Arbeitsergebnisse."],
+    g3:["[ER_CAP] {zeigte|zeigt} sich auch bei erhöhtem Arbeitsanfall belastbar und {erzielte|erzielt} gute Arbeitsergebnisse."],
+    g4:["[ER_CAP] {war|ist} den Belastungen der Tätigkeit gewachsen."] },
+  verl: { name:"Reliability & Accountability", desc:"Zuverlässigkeit, Verantwortungsbewusstsein",
+    g1:["[NAME] {arbeitete|arbeitet} äußerst zuverlässig und verantwortungsbewusst; auf [IHN] {war|ist} jederzeit uneingeschränkt Verlass.",
+        "[ER_CAP] {erwies|erweist} sich als in höchstem Maße zuverlässig, loyal und verantwortungsbewusst."],
+    g2:["[NAME] {arbeitete|arbeitet} sehr zuverlässig und verantwortungsbewusst; auf [IHN] {war|ist} stets Verlass."],
+    g3:["[NAME] {arbeitete|arbeitet} zuverlässig und verantwortungsbewusst."],
+    g4:["[NAME] {arbeitete|arbeitet} im Allgemeinen zuverlässig."] },
+  erfolg: { name:"Work Performance", desc:"Arbeitserfolg: quality, efficiency, objectives",
+    g1:["Die Qualität und Quantität [SEINER] Arbeitsergebnisse {lag|liegt} stets weit über unseren Erwartungen; die vereinbarten Ziele {erreichte|erreicht} [ER] jederzeit in vollem Umfang und {übertraf|übertrifft} sie häufig deutlich.",
+        "[SEINE] Arbeitsergebnisse {waren|sind} in qualitativer wie quantitativer Hinsicht stets hervorragend; sämtliche Ziele {erreichte|erreicht} [ER] auch unter schwierigen Bedingungen in vollem Umfang."],
+    g2:["Die Qualität und Quantität [SEINER] Arbeitsergebnisse {lag|liegt} stets über unseren Erwartungen; die vereinbarten Ziele {erreichte|erreicht} [ER] in vollem Umfang."],
+    g3:["[SEINE] Arbeitsergebnisse {entsprachen|entsprechen} stets unseren Erwartungen; die vereinbarten Ziele {erreichte|erreicht} [ER]."],
+    g4:["[SEINE] Arbeitsergebnisse {entsprachen|entsprechen} unseren Erwartungen."] },
+  verh: { name:"Communication & Teamwork", desc:"Conduct — supervisors listed first by convention", conduct:true,
+    g1:["[SEIN] Verhalten gegenüber Vorgesetzten, Kolleginnen und Kollegen sowie Kunden und Geschäftspartnern {war|ist} jederzeit vorbildlich; [ER] {wurde|wird} von allen als äußerst kompetent, teamorientiert und hilfsbereit geschätzt."],
+    g2:["[SEIN] Verhalten gegenüber Vorgesetzten, Kolleginnen und Kollegen sowie Kunden {war|ist} stets einwandfrei; [ER] {wurde|wird} als kompetent und hilfsbereit geschätzt."],
+    g3:["[SEIN] Verhalten gegenüber Vorgesetzten, Kolleginnen und Kollegen sowie Kunden {war|ist} einwandfrei."],
+    g4:["[SEIN] Verhalten gegenüber Vorgesetzten, Kolleginnen und Kollegen sowie Kunden {war|ist} insgesamt korrekt."] },
+  fuehr: { name:"Leadership", desc:"Only if the employee has management responsibilities", leadership:true,
+    g1:["[NAME] {führte|führt} das Team stets zielorientiert, motivierend und vorbildlich; das Team {erzielte|erzielt} durchgehend sehr gute Leistungen, und [ER] {wurde|wird} als Führungskraft in höchstem Maße anerkannt und geschätzt."],
+    g2:["[NAME] {führte|führt} das Team zielorientiert und motivierend; das Team {erzielte|erzielt} gute Leistungen, und [ER] {wurde|wird} als Führungskraft voll anerkannt."],
+    g3:["[NAME] {führte|führt} das Team zielorientiert und {wurde|wird} als Führungskraft anerkannt."],
+    g4:["[NAME] {nahm|nimmt} die übertragenen Führungsaufgaben ordnungsgemäß wahr."] },
+  overall: { name:"Overall Performance", desc:"Drives the summary sentence and the closing formula", overall:true,
+    g1:["Die [IHM] übertragenen Aufgaben {erledigte|erledigt} [ER] stets zu unserer vollsten Zufriedenheit."],
+    g2:["Die [IHM] übertragenen Aufgaben {erledigte|erledigt} [ER] stets zu unserer vollen Zufriedenheit."],
+    g3:["Die [IHM] übertragenen Aufgaben {erledigte|erledigt} [ER] zu unserer vollen Zufriedenheit."],
+    g4:["Die [IHM] übertragenen Aufgaben {erledigte|erledigt} [ER] zu unserer Zufriedenheit."] },
+};
+
+const REASONS = {
+  wunsch:"Das Arbeitsverhältnis endet auf eigenen Wunsch von [NAME] zum [ENDE].",
+  einvernehmen:"Das Arbeitsverhältnis endet zum [ENDE] im besten gegenseitigen Einvernehmen.",
+  befristung:"Das Arbeitsverhältnis endet zum [ENDE] durch Ablauf der vereinbarten Befristung.",
+  betrieb:"Das Arbeitsverhältnis endet zum [ENDE] aus betriebsbedingten Gründen.",
+};
+
+const CLOSING_FINAL = {
+  1:"Wir bedauern [SEINEN] Weggang außerordentlich und danken [IHM] für die stets hervorragende und vertrauensvolle Zusammenarbeit. Für die berufliche und private Zukunft wünschen wir [IHM] weiterhin viel Erfolg und alles Gute.",
+  2:"Wir bedauern [SEINEN] Weggang, danken [IHM] für die stets gute und vertrauensvolle Zusammenarbeit und wünschen [IHM] für die berufliche und private Zukunft viel Erfolg und alles Gute.",
+  3:"Wir danken [IHM] für die gute Zusammenarbeit und wünschen [IHM] für die Zukunft alles Gute und viel Erfolg.",
+  4:"Wir danken [IHM] für die Zusammenarbeit und wünschen [IHM] für die Zukunft alles Gute.",
+};
+const CLOSING_INTERIM = {
+  1:"Dieses Zwischenzeugnis wird auf eigenen Wunsch ausgestellt. Wir danken [IHM] für die bisherige stets hervorragende Zusammenarbeit und freuen uns auf die weitere gemeinsame erfolgreiche Zusammenarbeit.",
+  2:"Dieses Zwischenzeugnis wird auf eigenen Wunsch ausgestellt. Wir danken [IHM] für die bisherige stets gute Zusammenarbeit und freuen uns auf die weitere Zusammenarbeit.",
+  3:"Dieses Zwischenzeugnis wird auf eigenen Wunsch ausgestellt. Wir danken [IHM] für die gute Zusammenarbeit und freuen uns auf die weitere Zusammenarbeit.",
+  4:"Dieses Zwischenzeugnis wird auf eigenen Wunsch ausgestellt. Wir danken [IHM] für die Zusammenarbeit.",
+};
+/* =================== END OF MAPPING BLOCK ======================= */
+
+const ORDER = ["fach","init","weise","druck","verl","erfolg","fuehr","verh","overall"];
+const state = { type:"final", ratings:{}, comments:{}, leadership:false, seed:1 };
+
+/* ---- build rating UI ---- */
+const catsDiv = document.getElementById("cats");
+ORDER.forEach(key=>{
+  const c = SENT[key];
+  const div = document.createElement("div");
+  div.className = "cat"; div.id = "cat_"+key;
+  let inner = "";
+  if(c.leadership){
+    inner += `<div class="cname">${c.name}</div><div class="cdesc">Does this employee have management responsibilities?</div>
+      <div class="toggle" id="leadToggle">
+        <button data-v="no" class="sel">No</button><button data-v="yes">Yes</button>
+      </div><div id="leadInner" style="display:none">`;
+  } else {
+    inner += `<div class="cname">${c.name}</div><div class="cdesc">${c.desc}</div>`;
+  }
+  inner += `<div class="rating-group" data-key="${key}">`+
+    [1,2,3,4,5].map(g=>`<button data-g="${g}" class="${g===5?'g5b':''}">${g}</button>`).join("")+
+    `</div><label class="opt" style="font-weight:400;font-size:12px">Comment (optional)</label>
+    <textarea rows="2" data-comment="${key}"></textarea>`;
+  if(c.leadership) inner += `</div>`;
+  div.innerHTML = inner;
+  catsDiv.appendChild(div);
+});
+
+/* ---- events ---- */
+document.querySelectorAll(".rating-group button").forEach(b=>{
+  b.addEventListener("click",e=>{
+    const grp = e.target.closest(".rating-group");
+    grp.querySelectorAll("button").forEach(x=>x.classList.remove("sel","g5"));
+    e.target.classList.add("sel"); if(e.target.dataset.g==="5") e.target.classList.add("g5");
+    state.ratings[grp.dataset.key] = +e.target.dataset.g;
+    render();
+  });
+});
+document.querySelectorAll("textarea[data-comment]").forEach(t=>{
+  t.addEventListener("input",e=>{ state.comments[e.target.dataset.comment]=e.target.value; render(); });
+});
+document.getElementById("typeToggle").addEventListener("click",e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  document.querySelectorAll("#typeToggle button").forEach(b=>b.classList.remove("sel"));
+  e.target.classList.add("sel");
+  state.type = e.target.dataset.v;
+  const fin = state.type==="final";
+  document.getElementById("endWrap").style.display = fin?"":"none";
+  document.getElementById("reasonWrap").style.display = fin?"":"none";
+  render();
+});
+document.addEventListener("click",e=>{
+  if(e.target.closest("#leadToggle") && e.target.tagName==="BUTTON"){
+    document.querySelectorAll("#leadToggle button").forEach(b=>b.classList.remove("sel"));
+    e.target.classList.add("sel");
+    state.leadership = e.target.dataset.v==="yes";
+    document.getElementById("leadInner").style.display = state.leadership?"":"none";
+    render();
+  }
+});
+["issueDate","firstName","lastName","gender","jobTitle","startDate","endDate","reason","tasks","achievements","internal"]
+  .forEach(id=>document.getElementById(id).addEventListener("input",render));
+document.getElementById("issueDate").value = new Date().toISOString().slice(0,10);
+
+function reshuffle(){ state.seed = Math.floor(Math.random()*1e6); render(); }
+
+/* ---- language detection ---- */
+/* English words that are NOT also German words (avoids false flags on German text) */
+const EN_WORDS=/\b(the|and|with|of|is|are|he|she|they|we|you|it|i|this|that|these|those|his|her|their|our|your|has|have|had|been|be|will|would|can|could|should|to|for|from|not|but|or|at|on|by|as|do|does|did|don't|doesn't|didn't|can't|won't|isn't|wasn't|aren't|it's|that's|know|knows|knew|think|thinks|thought|want|wants|need|needs|just|some|any|because|about|only|then|if|when|while|since|until|able|other|another|many|much|every|never|often|really|worked|working|works|went|got|took|gave|made|kept|showed|put|very|always|good|great|excellent|strong|highly|skills|skill|ability|responsible|reliable|led|managed|manages|delivered|demonstrated|helped|ensured|improved|developed|created|built|successfully|during|which|who|whom|more|most|well|colleagues|customers|company|role|tasks|goals|results|performance|leadership|communication|throughout|across|within)\b/gi;
+const DE_HINTS=/[äöüß]|\b(und|der|die|das|mit|für|wurde|wurden|sehr|bei|von|dem|den|des|eine|einen|einer|stets|hat|hatte|sich|auch|sowie|durch|er|sie|ist|war|waren|im|zum|zur|nicht|als|über|unter|nach|vor|seine|ihre|dabei|dessen|deren|ich|wir|mir|mich|ihn|ihnen|kann|können|konnte|muss|wird|werden|sind|haben|gibt|gab|mehr|immer|dann|wenn|weil|dass|noch|schon|nur|aber|oder|wie|weiss)\b/gi;
+function looksEnglish(t){
+  if(!t||t.trim().length<4) return false;
+  const en=(t.match(EN_WORDS)||[]).length;
+  const de=(t.match(DE_HINTS)||[]).length;
+  if(en===0) return false;
+  return en>=2 ? en>=de : en>de;  /* clear English presence wins ties -> flag */
+}
+function checkText(t){
+  if(!t||!t.trim()) return null;
+  const letters=t.replace(/[^A-Za-zÄÖÜäöüß]/g,"");
+  if(letters.length>=6){
+    const upper=letters.replace(/[^A-ZÄÖÜ]/g,"").length;
+    if(upper/letters.length>0.7) return "Formatting: all caps — please rewrite in normal case";
+  }
+  if(/(.)\1{3,}/.test(t) || /[!?]{2,}/.test(t)) return "Formatting: please check (repeated characters/punctuation)";
+  if(looksEnglish(t)) return "Not in German — the People team will translate this before issuing";
+  return null;
+}
+/* ---- live inline warnings under text fields ---- */
+function attachLiveCheck(el,perLine){
+  const w=document.createElement("div");
+  w.style.cssText="display:none;font-size:12px;color:#8a6d1a;background:#fff3cd;border-radius:4px;padding:4px 8px;margin-top:4px";
+  el.insertAdjacentElement("afterend",w);
+  el.addEventListener("input",()=>{
+    let issue=null;
+    if(perLine){
+      for(const line of el.value.split("\n")){ issue=checkText(line); if(issue) break; }
+    } else issue=checkText(el.value);
+    if(issue){ w.textContent="⚠ "+issue; w.style.display="block"; }
+    else w.style.display="none";
+  });
+}
+document.querySelectorAll("textarea[data-comment]").forEach(t=>attachLiveCheck(t,false));
+attachLiveCheck(document.getElementById("tasks"),true);
+attachLiveCheck(document.getElementById("achievements"),false);
+
+/* ---- grammar & text engine ---- */
+const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+function deDate(iso){ if(!iso)return "…"; const d=new Date(iso+"T00:00:00"); return `${d.getDate()}. ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; }
+function genitive(n){ return /[sxzß]$/i.test(n.trim()) ? n+"’" : n+"s"; }
+
+function grammar(){
+  const fn=document.getElementById("firstName").value.trim()||"…";
+  const ln=document.getElementById("lastName").value.trim()||"…";
+  const g=document.getElementById("gender").value;
+  const full=fn+" "+ln;
+  if(g==="m") return {NAME:"Herr "+ln, NAMEDAT:"Herrn "+ln, FULL:full, ER:"er", IHM:"ihm", IHN:"ihn", SEIN:"sein", SEINE:"seine", SEINEN:"seinen", SEINER:"seiner", introName:"Herr "+full};
+  if(g==="f") return {NAME:"Frau "+ln, NAMEDAT:"Frau "+ln, FULL:full, ER:"sie", IHM:"ihr", IHN:"sie", SEIN:"ihr", SEINE:"ihre", SEINEN:"ihren", SEINER:"ihrer", introName:"Frau "+full};
+  const gen=genitive(full);
+  return {NAME:full, NAMEDAT:full, FULL:full, ER:full, IHM:full, IHN:full, SEIN:gen, SEINE:gen, SEINEN:gen, SEINER:gen, introName:full};
+}
+
+function fill(tpl,G,extra={}){
+  let t = tpl.replace(/\{([^{}|]*)\|([^{}|]*)\}/g,(m,p,pr)=> state.type==="final"?p:pr);
+  const map = Object.assign({
+    "[ER_CAP]": G.ER.charAt(0).toUpperCase()+G.ER.slice(1),
+    "[NAME]":G.NAME,"[ER]":G.ER,"[IHM]":G.IHM,"[IHN]":G.IHN,
+    "[SEINEN]":G.SEINEN,"[SEINER]":G.SEINER,"[SEINE]":G.SEINE,"[SEIN]":G.SEIN,
+    "[FIRMA]":CONFIG.companyName
+  },extra);
+  for(const k of ["[ER_CAP]","[SEINEN]","[SEINER]","[SEINE]","[SEIN]","[NAME]","[IHM]","[IHN]","[ER]","[FIRMA]","[ENDE]","[START]","[TITLE]"]){
+    if(map[k]!==undefined) t=t.split(k).join(map[k]);
+  }
+  return capFirst(t);
+}
+function capFirst(s){ s=(s||"").trim(); return s? s.charAt(0).toUpperCase()+s.slice(1) : s; }
+function pick(arr,key){ return arr[(state.seed + key.length*7) % arr.length]; }
+function effGrade(g){ return g===5?4:g; }
+
+/* ---- document assembly: returns array of {type:'h'|'p'|'ul'|'sig'|'draft', ...} ---- */
+function buildDoc(){
+  const G=grammar();
+  const title=document.getElementById("jobTitle").value.trim()||"…";
+  const start=deDate(document.getElementById("startDate").value);
+  const ende=deDate(document.getElementById("endDate").value);
+  const fin = state.type==="final";
+  const blocks=[];
+  const any5 = Object.values(state.ratings).some(v=>v===5);
+
+  if(any5) blocks.push({type:"draft",text:"ENTWURF – Bewertung „5“ vergeben. Bitte vor Ausstellung mit Finance/HR abstimmen."});
+  blocks.push({type:"h",text: fin?"Arbeitszeugnis":"Zwischenzeugnis"});
+
+  const roleTxt = title;
+  blocks.push({type:"p",text: fin
+    ? `${G.introName} war vom ${start} bis zum ${ende} als ${roleTxt} bei der ${CONFIG.companyName} in Berlin beschäftigt.`
+    : `${G.introName} ist seit dem ${start} als ${roleTxt} bei der ${CONFIG.companyName} in Berlin beschäftigt.`});
+
+  blocks.push({type:"p",text: CONFIG.companyParagraph});
+
+  const tasks=document.getElementById("tasks").value.split("\n").map(s=>capFirst(s.trim())).filter(Boolean);
+  if(tasks.length){
+    blocks.push({type:"p",text: fill("Zu [SEINEN] wesentlichen Aufgaben {gehörten|gehören}:",G)});
+    blocks.push({type:"ul",items:tasks});
+  }
+
+  function pushWithComment(base,key){
+    const c=capFirst((state.comments[key]||"").trim());
+    if(c) blocks.push({type:"p",text:base+" "+c,comment:c,issue:checkText(c)});
+    else blocks.push({type:"p",text:base});
+  }
+  const perf=["fach","init","weise","druck","verl","erfolg"];
+  perf.forEach(k=>{
+    const g=state.ratings[k]; if(!g)return;
+    pushWithComment(fill(pick(SENT[k]["g"+effGrade(g)],k),G),k);
+  });
+
+  const ach=capFirst(document.getElementById("achievements").value.trim());
+  if(ach) blocks.push({type:"p",text:"Besonders hervorzuheben: "+ach,comment:ach,issue:checkText(ach)});
+
+  if(state.leadership && state.ratings.fuehr){
+    pushWithComment(fill(pick(SENT.fuehr["g"+effGrade(state.ratings.fuehr)],"fuehr"),G),"fuehr");
+  }
+  if(state.ratings.overall){
+    blocks.push({type:"p",text:fill(pick(SENT.overall["g"+effGrade(state.ratings.overall)],"overall"),G)});
+  }
+  if(state.ratings.verh){
+    pushWithComment(fill(pick(SENT.verh["g"+effGrade(state.ratings.verh)],"verh"),G),"verh");
+  }
+
+  const og = effGrade(state.ratings.overall||3);
+  if(fin){
+    blocks.push({type:"p",text:fill(REASONS[document.getElementById("reason").value],G,{"[ENDE]":ende})});
+    blocks.push({type:"p",text:fill(CLOSING_FINAL[og],G)});
+  } else {
+    blocks.push({type:"p",text:fill(CLOSING_INTERIM[og],G)});
+  }
+
+  blocks.push({type:"sig",city:CONFIG.signatureCity,date:deDate(document.getElementById("issueDate").value)});
+  return blocks;
+}
+
+/* ---- preview render ---- */
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function render(){
+  const any5 = Object.values(state.ratings).some(v=>v===5);
+  document.getElementById("warn5").classList.toggle("show",any5);
+  const p=document.getElementById("preview");
+  const rated = Object.keys(state.ratings).length>0;
+  const nameSet = document.getElementById("lastName").value.trim();
+  if(!rated && !nameSet){
+    p.innerHTML='<p class="placeholder">The Zeugnis appears here as you fill in the form …</p>'; return;
+  }
+  let html="";
+  buildDoc().forEach(b=>{
+    if(b.type==="h") html+=`<h3>${esc(b.text)}</h3>`;
+    else if(b.type==="draft") html+=`<div class="draftflag">${esc(b.text)}</div>`;
+    else if(b.type==="p"){
+      if(b.issue && b.comment){
+        const base=b.text.slice(0,b.text.length-b.comment.length);
+        html+=`<p>${esc(base)}<span class="enmark">${esc(b.comment)}</span><span class="ennote">${esc(b.issue)}</span></p>`;
+      } else html+=`<p>${esc(b.text)}</p>`;
+    }
+    else if(b.type==="ul") html+=`<ul>${b.items.map(i=>{
+      const iss=checkText(i);
+      return iss?`<li><span class="enmark">${esc(i)}</span><span class="ennote">${esc(iss)}</span></li>`:`<li>${esc(i)}</li>`;
+    }).join("")}</ul>`;
+    else if(b.type==="sig"){
+      html+=`<div class="sig"><p>${esc(b.city)}, den ${esc(b.date)}</p><br><br>
+      <table style="width:100%"><tr>
+      <td style="width:45%;border-top:1px solid #333;padding-top:4px">${esc(CONFIG.signatureLine1)}${CONFIG.signatureName1?"<br>"+esc(CONFIG.signatureName1):""}</td>
+      <td style="width:10%"></td>
+      <td style="width:45%;border-top:1px solid #333;padding-top:4px">${esc(CONFIG.signatureLine2)}${CONFIG.signatureName2?" "+esc(CONFIG.signatureName2):""}</td>
+      </tr></table></div>`;
+    }
+  });
+  p.innerHTML=html;
+}
+render();
+
+/* ---- copy ---- */
+function plainText(){
+  return buildDoc().map(b=>{
+    if(b.type==="h")return b.text.toUpperCase()+"\n";
+    if(b.type==="draft")return "["+b.text+"]\n";
+    if(b.type==="p")return b.text;
+    if(b.type==="ul")return b.items.map(i=>"• "+i).join("\n");
+    if(b.type==="sig")return `\n${b.city}, den ${b.date}\n\n\n${CONFIG.signatureLine1} ${CONFIG.signatureName1}    ${CONFIG.signatureLine2} ${CONFIG.signatureName2}`;
+  }).join("\n\n");
+}
+function copyText(){ navigator.clipboard.writeText(plainText()).then(()=>alert("Copied to clipboard.")); }
+
+/* ---- docx generation & delivery ---- */
+async function generateDocxBlob(){
+  const D=docx;
+  const children=[];
+  buildDoc().forEach(b=>{
+    if(b.type==="draft"){
+      children.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:300},
+        children:[new D.TextRun({text:b.text,bold:true,color:"E84661",size:24})]}));
+    } else if(b.type==="h"){
+      children.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:400},
+        children:[new D.TextRun({text:b.text,bold:true,size:32,font:"Times New Roman"})]}));
+    } else if(b.type==="p"){
+      children.push(new D.Paragraph({alignment:D.AlignmentType.JUSTIFIED,spacing:{after:220,line:320},
+        children:[new D.TextRun({text:b.text,size:23,font:"Times New Roman"})]}));
+    } else if(b.type==="ul"){
+      b.items.forEach(i=>children.push(new D.Paragraph({bullet:{level:0},spacing:{after:80,line:320},
+        children:[new D.TextRun({text:i,size:23,font:"Times New Roman"})]})));
+      children.push(new D.Paragraph({spacing:{after:140},children:[]}));
+    } else if(b.type==="sig"){
+      children.push(new D.Paragraph({spacing:{before:500,after:800},
+        children:[new D.TextRun({text:`${b.city}, den ${b.date}`,size:23,font:"Times New Roman"})]}));
+      children.push(new D.Paragraph({spacing:{before:600},children:[
+        new D.TextRun({text:"_______________________",size:23,font:"Times New Roman"}),
+        new D.TextRun({text:"\t\t",size:23}),
+        new D.TextRun({text:"_______________________",size:23,font:"Times New Roman"})]}));
+      children.push(new D.Paragraph({children:[
+        new D.TextRun({text:CONFIG.signatureLine1+(CONFIG.signatureName1?" – "+CONFIG.signatureName1:""),size:21,font:"Times New Roman"}),
+        new D.TextRun({text:"\t\t\t",size:21}),
+        new D.TextRun({text:CONFIG.signatureLine2+(CONFIG.signatureName2?" "+CONFIG.signatureName2:""),size:21,font:"Times New Roman"})]}));
+    }
+  });
+  const doc=new D.Document({
+    creator:"Bojana Ivanovic Jentsch",
+    lastModifiedBy:"Bojana Ivanovic Jentsch",
+    title:(state.type==="final"?"Arbeitszeugnis":"Zwischenzeugnis")+" "+document.getElementById("lastName").value,
+    sections:[{properties:{page:{margin:{top:1700,bottom:1400,left:1700,right:1700}}},children}]
+  });
+  const blob=await D.Packer.toBlob(doc);
+  const ln=document.getElementById("lastName").value.trim()||"Zeugnis";
+  const fname=(state.type==="final"?"Arbeitszeugnis":"Zwischenzeugnis")+"_"+ln+".docx";
+  return {blob,fname,ln};
+}
+
+async function sendToFinance(){
+  try{
+    if(typeof docx==="undefined"){
+      alert("The Word library could not be loaded. This usually means:\n\n• You are viewing the tool inside a preview pane (e.g. in Claude or SharePoint) that blocks external scripts — please download index.html and open it directly in Chrome or Edge, or use the GitHub Pages link.\n• Or you are offline / behind a proxy blocking cdnjs.cloudflare.com.");
+      return;
+    }
+    const {blob,fname,ln}=await generateDocxBlob();
+  if(CONFIG.uploadEndpoint){
+    try{
+      const fd=new FormData();
+      fd.append("file",blob,fname);
+      fd.append("employee",ln);
+      fd.append("internalNote",document.getElementById("internal").value);
+      const r=await fetch(CONFIG.uploadEndpoint,{method:"POST",body:fd});
+      if(!r.ok) throw new Error(r.status);
+      alert("Done – the Zeugnis draft was uploaded to SharePoint and Finance has been notified.");
+      return;
+    }catch(err){
+      alert("Automatic upload failed ("+err+"). Falling back to email – the file will download now, please attach it to the email that opens.");
+    }
+  }
+  // fallback / default: download + pre-addressed email draft
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=fname; a.click(); URL.revokeObjectURL(a.href);
+  const subj=encodeURIComponent("Zeugnis draft: "+ln+" ("+(state.type==="final"?"Arbeitszeugnis":"Zwischenzeugnis")+")");
+  const body=encodeURIComponent(
+`Hi,
+
+please find attached the generated Zeugnis draft for ${ln}.
+(The file "${fname}" was just saved to your Downloads folder - please attach it before sending.)
+
+Internal note for the People team: ${document.getElementById("internal").value||"-"}
+
+This draft was generated with the Apheris Reference Letter Generator and requires review by the People team before issuing.`);
+    setTimeout(()=>{ window.location.href=`mailto:${CONFIG.recipientEmail}?subject=${subj}&body=${body}`; },400);
+  }catch(err){
+    alert("Something went wrong while generating the document:\n\n"+err+"\n\nPlease report this to the People team.");
+  }
+}
+</script>
+</body>
+</html>
